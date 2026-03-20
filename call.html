@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>ASCII Video Call</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="stylesheet" href="css/call.css" />
+	<link href="/favicon.png" rel="icon" type="image/png" />
+	<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+
+	<!-- ── Lobby ────────────────────────────────────────────────── -->
+	<div id="lobby">
+		<h1>ASCII Video Call</h1>
+		<p class="intro">Real-time ASCII video calls powered by <a href="https://supabase.com" target="_blank" rel="noopener">Supabase</a>.</p>
+
+		<form id="joinForm" novalidate>
+			<div class="field">
+				<label for="supabaseUrl">Supabase Project URL</label>
+				<input type="url" id="supabaseUrl" placeholder="https://xxxx.supabase.co" autocomplete="off" required />
+			</div>
+			<div class="field">
+				<label for="supabaseKey">Supabase Anon Key</label>
+				<input type="text" id="supabaseKey" placeholder="eyJ…" autocomplete="off" required />
+			</div>
+			<div class="field">
+				<label for="roomName">Room Name</label>
+				<input type="text" id="roomName" placeholder="my-room" pattern="[A-Za-z0-9\-]+" autocomplete="off" required />
+				<small>Share this name with anyone you want to call.</small>
+			</div>
+			<p id="lobbyError" class="error" hidden></p>
+			<button type="submit" id="joinBtn">Join Room</button>
+		</form>
+
+		<p class="hint">
+			No Supabase project yet?
+			<a href="https://supabase.com/dashboard" target="_blank" rel="noopener">Create one free</a>
+			and enable <strong>Realtime</strong> in your project settings.
+		</p>
+	</div>
+
+	<!-- ── Call interface (hidden until joined) ─────────────────── -->
+	<div id="callInterface" hidden>
+
+		<header id="callHeader">
+			<span id="roomLabel"></span>
+			<div id="callControls">
+				<button id="muteBtn" title="Mute/unmute your feed">Pause feed</button>
+				<button id="leaveBtn">Leave</button>
+			</div>
+		</header>
+
+		<div id="callGrid">
+			<!-- Own feed -->
+			<div class="feed" id="myFeed">
+				<div class="feed-label">You</div>
+				<pre class="feed-ascii" id="myAscii" aria-label="Your ASCII video feed"></pre>
+			</div>
+			<!-- Remote participants injected here -->
+		</div>
+
+		<footer id="statusBar">
+			<span id="statusText">Connecting…</span>
+		</footer>
+
+	</div>
+
+	<a href="index.html" id="backLink">← Solo Camera</a>
+
+	<!-- Supabase JS (CDN, UMD build – exposes window.supabase) -->
+	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+	<script src="script/camera.js"></script>
+	<script src="script/ascii.js"></script>
+	<script src="script/call.js"></script>
+
+</body>
+</html>
