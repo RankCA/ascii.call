@@ -15,14 +15,15 @@ Calls are brokered through [Supabase Realtime](https://supabase.com/realtime) (b
 ### Quick start
 
 1. **Create a free Supabase project** at <https://supabase.com/dashboard>.
-2. In your project dashboard go to **Project Settings → API** and copy:
-   - **Project URL** (e.g. `https://xxxx.supabase.co`)
-   - **Anon / public key**
-3. In your project dashboard go to **Realtime** and make sure it is **enabled**.
-4. Open `call.html`, paste your Project URL and Anon Key, pick a room name, and click **Join Room**.
-5. Share the room name with friends — they follow the same steps to join.
+2. Go to **Project Settings → API** and copy your **Project URL** and **Anon / public key**.
+3. Confirm that **Realtime** is enabled (it is by default on new projects).
+4. Open `call.html`, paste those two values, pick a room name, and click **Join Room**.
+5. Share the room name with friends so they can join.
 
 > No database tables are required. The feature uses only ephemeral Realtime broadcast channels.
+
+**Need more detail?** See the [step-by-step Supabase setup guide](SUPABASE_SETUP.md) for
+screenshots, descriptions, troubleshooting tips, and free-tier usage estimates.
 
 ## Supported browsers
 
