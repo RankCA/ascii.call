@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <!-- Paper theme: warm off-white background, near-black text -->
+  <rect width="192" height="192" fill="#f0ede8"/>
+
+  <!-- Subtle border -->
+  <rect x="6" y="6" width="180" height="180" rx="6"
+        fill="none" stroke="#ccc8c2" stroke-width="1.5"/>
+
+  <!-- ASCII.CALL — large, centred, monospace -->
+  <text
+    x="96" y="88"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    font-family="'Courier New', Courier, monospace"
+    font-size="26"
+    font-weight="bold"
+    fill="#1a1a1a"
+    letter-spacing="2">ASCII</text>
+
+  <text
+    x="96" y="118"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    font-family="'Courier New', Courier, monospace"
+    font-size="26"
+    font-weight="bold"
+    fill="#1a1a1a"
+    letter-spacing="2">.CALL</text>
+
+  <!-- Thin underline rule -->
+  <line x1="28" y1="134" x2="164" y2="134"
+        stroke="#ccc8c2" stroke-width="1"/>
+
+  <!-- Sub-label -->
+  <text
+    x="96" y="152"
+    text-anchor="middle"
+    font-family="'Courier New', Courier, monospace"
+    font-size="9"
+    fill="#888"
+    letter-spacing="3">VIDEO · ASCII</text>
+</svg>

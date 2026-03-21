@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Maskable: full bleed background, content within safe zone (centre 80%) -->
+  <rect width="512" height="512" fill="#f0ede8"/>
+
+  <!-- ASCII.CALL — centred within safe zone -->
+  <text
+    x="256" y="222"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    font-family="'Courier New', Courier, monospace"
+    font-size="80"
+    font-weight="bold"
+    fill="#1a1a1a"
+    letter-spacing="4">ASCII</text>
+
+  <text
+    x="256" y="314"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    font-family="'Courier New', Courier, monospace"
+    font-size="80"
+    font-weight="bold"
+    fill="#1a1a1a"
+    letter-spacing="4">.CALL</text>
+
+  <!-- Rule -->
+  <line x1="80" y1="362" x2="432" y2="362"
+        stroke="#ccc8c2" stroke-width="1.5"/>
+
+  <!-- Sub-label -->
+  <text
+    x="256" y="396"
+    text-anchor="middle"
+    font-family="'Courier New', Courier, monospace"
+    font-size="20"
+    fill="#888"
+    letter-spacing="8">VIDEO · ASCII</text>
+</svg>
