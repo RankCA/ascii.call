@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ASCII.CALL</title>
-<link rel="icon" type="image/x-icon" href="asciicam.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
@@ -252,7 +251,8 @@
 // ── Service worker registration ───────────────────────────────────────────
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
+    // Use a relative path so it works in any subdirectory (e.g. GitHub Pages)
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
       .then(reg => console.log('[PWA] SW registered:', reg.scope))
       .catch(err => console.warn('[PWA] SW registration failed:', err));
   });
