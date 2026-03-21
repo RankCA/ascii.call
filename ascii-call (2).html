@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASCII.CALL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+<style>
+
+/* ── THEMES ──────────────────────────────────────────────────────────────── */
+:root {
+  --p:#39ff14; --pd:#1a7a08; --pg:rgba(57,255,20,.18);
+  --bg:#060a04; --sf:#0b110a; --br:#1c2e18;
+  --red:#ff2244; --warn:#ffb000;
+}
+[data-theme="amber"]  {--p:#ffb000;--pd:#7a5500;--pg:rgba(255,176,0,.18);--bg:#080501;--sf:#110900;--br:#2e1e00;}
+[data-theme="glacier"]{--p:#00d4ff;--pd:#005c70;--pg:rgba(0,212,255,.18);--bg:#010810;--sf:#010d18;--br:#002030;}
+[data-theme="crimson"]{--p:#ff3366;--pd:#7a0028;--pg:rgba(255,51,102,.18);--bg:#080003;--sf:#110006;--br:#2e000d;}
+[data-theme="matrix"] {--p:#00ff41;--pd:#007a1e;--pg:rgba(0,255,65,.18);--bg:#000;--sf:#050a05;--br:#0d1a0d;}
+[data-theme="vapor"]  {--p:#e040fb;--pd:#6a007a;--pg:rgba(224,64,251,.18);--bg:#0d0010;--sf:#120018;--br:#280030;}
+
+/* ── RESET ───────────────────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{background:var(--bg);color:var(--p);font-family:'Share Tech Mono',monospace;overflow-x:hidden;transition:background .4s,color .4s;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 4px);pointer-events:none;z-index:9999;}
+@keyframes flicker{0%,97%,100%{opacity:1}98%{opacity:.97}99%{opacity:.99}}
+body{animation:flicker 10s infinite;}
+
+/* ── SHARED ──────────────────────────────────────────────────────────────── */
+.btn{background:transparent;border:1px solid var(--pd);color:var(--pd);font-family:'Share Tech Mono',monospace;font-size:.78rem;padding:.45rem 1rem;letter-spacing:.15em;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.btn:hover{border-color:var(--p);color:var(--p);background:var(--pg);}
+.btn.primary{border-color:var(--p);color:var(--p);}
+.btn.primary:hover{background:var(--p);color:var(--bg);box-shadow:0 0 18px var(--pg);}
+.btn.danger{border-color:var(--red);color:var(--red);}
+.btn.danger:hover{background:var(--red);color:#000;}
+.btn:disabled{opacity:.35;cursor:not-allowed;pointer-events:none;}
+.btn-full{width:100%;display:block;text-align:center;padding:.72rem;font-size:.86rem;}
+input[type=text],input[type=email],input[type=password]{background:var(--bg);border:1px solid var(--pd);color:var(--p);font-family:'Share Tech Mono',monospace;font-size:1rem;padding:.52rem .82rem;letter-spacing:.05em;outline:none;width:100%;transition:border-color .2s,box-shadow .2s;}
+input:focus{border-color:var(--p);box-shadow:0 0 0 1px var(--p);}
+input::placeholder{color:var(--pd);opacity:.5;}
+.field{margin-bottom:.9rem;}
+.field label{display:block;font-size:.65rem;color:var(--pd);letter-spacing:.25em;margin-bottom:.32rem;}
+.panel{background:var(--sf);border:1px solid var(--br);position:relative;}
+.ptitle{position:absolute;top:-.58em;left:1rem;background:var(--sf);padding:0 .5rem;font-size:.62rem;color:var(--pd);letter-spacing:.2em;}
+.err{color:var(--red);font-size:.7rem;margin-top:.45rem;min-height:1em;letter-spacing:.05em;}
+.info{color:var(--pd);font-size:.7rem;letter-spacing:.1em;}
+.ind{width:6px;height:6px;border-radius:50%;background:var(--pd);flex-shrink:0;}
+.ind.live{background:var(--p);box-shadow:0 0 6px var(--p);animation:lb 2s infinite;}
+@keyframes lb{0%,80%,100%{opacity:1}40%{opacity:.35}}
+@keyframes dots{0%,20%{content:'.'}40%{content:'..'}60%{content:'...'}80%,100%{content:''}}
+.ldots::after{content:'';animation:dots 1.4s infinite;}
+
+/* ── LOGO ────────────────────────────────────────────────────────────────── */
+.logo{font-family:'VT323',monospace;text-shadow:0 0 12px var(--p),0 0 35px var(--p);animation:gp 3s ease-in-out infinite;}
+@keyframes gp{0%,100%{text-shadow:0 0 12px var(--p),0 0 35px var(--p),0 0 70px var(--pg);}50%{text-shadow:0 0 6px var(--p),0 0 16px var(--p);}}
+
+/* ── LOADING ─────────────────────────────────────────────────────────────── */
+#loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:1.5rem;}
+
+/* ── AUTH ────────────────────────────────────────────────────────────────── */
+#auth-screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem;gap:2rem;}
+.auth-panel{width:100%;max-width:400px;padding:2rem;}
+.auth-tabs{display:flex;border-bottom:1px solid var(--br);margin-bottom:1.4rem;}
+.atab{flex:1;padding:.55rem;text-align:center;font-family:'Share Tech Mono',monospace;font-size:.78rem;letter-spacing:.2em;cursor:pointer;color:var(--pd);border:none;background:transparent;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
+.atab.active{color:var(--p);border-bottom-color:var(--p);}
+.aform{display:none;}
+.aform.active{display:block;}
+
+/* ── JOIN ────────────────────────────────────────────────────────────────── */
+#join-screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem;gap:2rem;}
+.join-panel{width:100%;max-width:420px;padding:2rem;}
+.jgreet{font-size:.72rem;color:var(--pd);letter-spacing:.22em;margin-bottom:1.6rem;text-align:center;}
+.jgreet span{color:var(--p);}
+.room-row{display:flex;gap:.5rem;}
+.room-row input{font-size:1.5rem;font-family:'VT323',monospace;text-transform:uppercase;letter-spacing:.25em;}
+.divider{display:flex;align-items:center;gap:.75rem;margin:1.1rem 0;color:var(--pd);font-size:.7rem;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--br);}
+.prof-corner{position:fixed;top:1rem;right:1rem;display:flex;align-items:center;gap:.4rem;font-size:.7rem;color:var(--pd);letter-spacing:.1em;cursor:pointer;padding:.38rem .7rem;border:1px solid var(--br);background:var(--sf);transition:all .15s;z-index:100;}
+.prof-corner:hover{border-color:var(--pd);color:var(--p);}
+
+/* ── CALL ────────────────────────────────────────────────────────────────── */
+#call-screen{display:none;flex-direction:column;height:100vh;overflow:hidden;}
+.topbar{display:flex;align-items:center;gap:.6rem;padding:.52rem .9rem;border-bottom:1px solid var(--br);background:var(--sf);flex-wrap:wrap;flex-shrink:0;}
+.tlogo{font-family:'VT323',monospace;font-size:1.45rem;text-shadow:0 0 8px var(--p);flex-shrink:0;}
+.rbadge{display:flex;align-items:center;gap:.4rem;background:var(--bg);border:1px solid var(--br);padding:.22rem .65rem;font-size:.72rem;letter-spacing:.15em;}
+.rbadge-lbl{color:var(--pd);}
+.rbadge-code{color:var(--p);font-family:'VT323',monospace;font-size:1.05rem;letter-spacing:.2em;}
+.pcnt{font-size:.66rem;color:var(--pd);letter-spacing:.1em;padding:.24rem .5rem;border:1px solid var(--br);}
+.topbar-r{margin-left:auto;display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;}
+
+/* ─ Video grid fills remaining height ───────────────────────────────────── */
+.call-body{flex:1;padding:.6rem;overflow:hidden;display:flex;}
+#video-grid{
+  flex:1;
+  display:grid;
+  gap:.6rem;
+  /* default - overridden by JS */
+  grid-template-columns:1fr;
+  grid-template-rows:1fr;
+  overflow:hidden;
+}
+.video-panel{background:var(--sf);border:1px solid var(--br);display:flex;flex-direction:column;overflow:hidden;min-height:0;}
+.vph{display:flex;align-items:center;justify-content:space-between;padding:.3rem .6rem;border-bottom:1px solid var(--br);background:var(--bg);font-size:.65rem;letter-spacing:.2em;color:var(--pd);flex-shrink:0;}
+.pname{color:var(--p);}
+.ascii-wrap{flex:1;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:.3rem;}
+pre.asc{font-family:'Share Tech Mono',monospace;font-size:5px;line-height:5.2px;letter-spacing:.3px;color:var(--p);white-space:pre;text-shadow:0 0 3px var(--pg);transition:color .4s,text-shadow .4s;}
+
+/* Waiting tile */
+.wstate{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:.7rem;padding:1.5rem;}
+.wtxt{color:var(--pd);font-size:.7rem;letter-spacing:.12em;text-align:center;}
+@keyframes wd{0%,20%{content:'.'}40%{content:'..'}60%{content:'...'}80%,100%{content:''}}
+.wdots::after{content:'';animation:wd 1.5s infinite;}
+.wcode{color:var(--p);font-family:'VT323',monospace;font-size:1.6rem;letter-spacing:.35em;border:1px solid var(--br);padding:.2rem .9rem;text-shadow:0 0 8px var(--p);}
+.cpyhint{font-size:.6rem;color:var(--pd);opacity:.6;cursor:pointer;letter-spacing:.1em;}
+.cpyhint:hover{opacity:1;}
+
+/* Status bar */
+#sbar{display:flex;align-items:center;justify-content:space-between;padding:.28rem .9rem;border-top:1px solid var(--br);background:var(--sf);font-size:.64rem;color:var(--pd);letter-spacing:.1em;flex-shrink:0;}
+.spill{display:flex;align-items:center;gap:.45rem;}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.dot-idle{background:var(--pd);}
+.dot-waiting{background:var(--warn);animation:bd 1s infinite;}
+.dot-connected{background:var(--p);box-shadow:0 0 5px var(--p);}
+.dot-error{background:var(--red);}
+@keyframes bd{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ── MODALS ──────────────────────────────────────────────────────────────── */
+.mbd{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:500;align-items:center;justify-content:center;padding:1.5rem;}
+.mbd.open{display:flex;}
+.modal{background:var(--sf);border:1px solid var(--br);max-width:460px;width:100%;max-height:90vh;overflow-y:auto;}
+.mhdr{display:flex;align-items:center;justify-content:space-between;padding:.62rem 1.1rem;border-bottom:1px solid var(--br);font-size:.68rem;letter-spacing:.25em;color:var(--pd);}
+.mhdr strong{color:var(--p);}
+.mcls{background:transparent;border:none;color:var(--pd);cursor:pointer;font-size:1.1rem;font-family:inherit;padding:0 .2rem;line-height:1;transition:color .15s;}
+.mcls:hover{color:var(--p);}
+.mbody{padding:1.2rem;}
+
+/* Themes */
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;}
+.tsw{border:1px solid var(--br);padding:.65rem .5rem;cursor:pointer;transition:border-color .15s;position:relative;display:flex;flex-direction:column;align-items:center;gap:.3rem;}
+.tsw:hover{border-color:var(--pd);}
+.tsw.active{border-color:var(--p);box-shadow:0 0 10px var(--pg);}
+.swp{font-size:10px;line-height:10px;font-family:'Share Tech Mono',monospace;letter-spacing:.5px;text-align:center;}
+.swn{font-size:.57rem;letter-spacing:.2em;}
+.swtk{position:absolute;top:.28rem;right:.38rem;font-size:.6rem;}
+.sw-terminal{background:#060a04;border-color:#1c2e18;} .sw-terminal .swp,.sw-terminal .swn{color:#39ff14;}
+.sw-amber   {background:#080501;border-color:#2e1e00;} .sw-amber .swp,.sw-amber .swn{color:#ffb000;}
+.sw-glacier {background:#010810;border-color:#002030;} .sw-glacier .swp,.sw-glacier .swn{color:#00d4ff;}
+.sw-crimson {background:#080003;border-color:#2e000d;} .sw-crimson .swp,.sw-crimson .swn{color:#ff3366;}
+.sw-matrix  {background:#000;border-color:#0d1a0d;}   .sw-matrix .swp,.sw-matrix .swn{color:#00ff41;}
+.sw-vapor   {background:#0d0010;border-color:#280030;} .sw-vapor .swp,.sw-vapor .swn{color:#e040fb;}
+
+/* Profile modal */
+.prow{display:flex;align-items:center;gap:.9rem;padding:.55rem 0;border-bottom:1px solid var(--br);}
+.prow:last-of-type{border-bottom:none;}
+.plbl{color:var(--pd);font-size:.65rem;letter-spacing:.15em;width:80px;flex-shrink:0;}
+.pval{color:var(--p);font-size:.86rem;letter-spacing:.06em;word-break:break-all;}
+
+@media(max-width:520px){.tgrid{grid-template-columns:repeat(2,1fr);}}
+
+/* Confirmation banner */
+#confirm-banner{display:none;position:fixed;top:0;left:0;right:0;background:var(--p);color:var(--bg);text-align:center;padding:.6rem;font-size:.78rem;letter-spacing:.15em;z-index:1000;animation:gp 2s infinite;}
+</style>
+</head>
+<body>
+
+<div id="confirm-banner">EMAIL CONFIRMED ✓ — YOU CAN NOW LOG IN</div>
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="logo" style="font-size:clamp(3rem,10vw,6rem)">ASCII.CALL</div>
+  <div class="info ldots">initialising</div>
+</div>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div style="text-align:center">
+    <div class="logo" style="font-size:clamp(2.5rem,8vw,5rem)">ASCII.CALL</div>
+    <div style="font-size:.75rem;color:var(--pd);letter-spacing:.3em;margin-top:.4rem">real-time video · rendered in characters</div>
+  </div>
+  <div class="panel auth-panel">
+    <div class="ptitle">TERMINAL ACCESS</div>
+    <div class="auth-tabs">
+      <button class="atab active" data-tab="login">LOGIN</button>
+      <button class="atab" data-tab="signup">SIGN UP</button>
+    </div>
+    <div class="aform active" id="form-login">
+      <div class="field"><label>EMAIL</label><input type="email" id="l-email" placeholder="user@example.com"></div>
+      <div class="field"><label>PASSWORD</label><input type="password" id="l-pass" placeholder="••••••••"></div>
+      <button class="btn primary btn-full" id="login-btn">LOGIN →</button>
+      <div class="err" id="l-err"></div>
+    </div>
+    <div class="aform" id="form-signup">
+      <div class="field"><label>USERNAME</label><input type="text" id="s-user" placeholder="handle (a-z, 0-9, _)" maxlength="20" autocomplete="off"></div>
+      <div class="field"><label>EMAIL</label><input type="email" id="s-email" placeholder="user@example.com"></div>
+      <div class="field"><label>PASSWORD</label><input type="password" id="s-pass" placeholder="min 6 characters"></div>
+      <button class="btn primary btn-full" id="signup-btn">CREATE ACCOUNT →</button>
+      <div class="err" id="s-err"></div>
+    </div>
+  </div>
+</div>
+
+<!-- JOIN -->
+<div id="join-screen">
+  <button class="prof-corner" id="prof-corner">
+    <span id="corner-name">—</span> ▸ PROFILE
+  </button>
+  <div style="text-align:center">
+    <div class="logo" style="font-size:clamp(2.5rem,8vw,5rem)">ASCII.CALL</div>
+  </div>
+  <div class="panel join-panel">
+    <div class="ptitle">ROOM ACCESS TERMINAL</div>
+    <div class="jgreet">welcome back, <span id="join-uname">—</span></div>
+    <div class="field">
+      <label>ENTER ROOM CODE</label>
+      <div class="room-row">
+        <input type="text" id="room-input" placeholder="XXXXXX" maxlength="8" autocomplete="off" spellcheck="false">
+        <button class="btn primary" id="join-btn">JOIN</button>
+      </div>
+    </div>
+    <div class="divider">or</div>
+    <button class="btn primary btn-full" id="new-room-btn">⌗ CREATE NEW ROOM</button>
+    <div style="margin-top:1rem;text-align:center">
+      <button class="btn" id="join-themes-btn" style="font-size:.66rem;padding:.3rem .65rem">⬡ THEMES</button>
+    </div>
+  </div>
+  <div style="font-size:.65rem;color:var(--pd);text-align:center;line-height:1.9;opacity:.6">
+    peer-to-peer · up to 8 participants · all ASCII<br>
+    requires camera permission · HTTPS or localhost
+  </div>
+</div>
+
+<!-- CALL -->
+<div id="call-screen">
+  <div class="topbar">
+    <span class="tlogo">ASCII.CALL</span>
+    <div class="rbadge">
+      <span class="rbadge-lbl">ROOM</span>
+      <span class="rbadge-code" id="room-display">——</span>
+    </div>
+    <span class="pcnt" id="peer-count">1 online</span>
+    <div class="topbar-r">
+      <button class="btn" id="call-themes-btn" style="font-size:.66rem;padding:.3rem .65rem">⬡ THEMES</button>
+      <button class="btn" id="call-prof-btn" style="font-size:.66rem;padding:.3rem .65rem">👤 PROFILE</button>
+      <button class="btn danger" id="end-btn">⏻ END</button>
+    </div>
+  </div>
+  <div class="call-body">
+    <div id="video-grid">
+      <div class="video-panel" id="local-panel">
+        <div class="vph">
+          <span class="pname" id="local-name">YOU</span>
+          <div style="display:flex;align-items:center;gap:.4rem">
+            <span style="font-size:.58rem;color:var(--pd)">LOCAL</span>
+            <span class="ind live"></span>
+          </div>
+        </div>
+        <div class="ascii-wrap"><pre id="local-ascii" class="asc"></pre></div>
+      </div>
+      <!-- Waiting tile - shown when no remote peers -->
+      <div class="video-panel" id="waiting-panel">
+        <div class="vph"><span>AWAITING PEER</span><span class="ind"></span></div>
+        <div class="ascii-wrap">
+          <div class="wstate">
+            <div class="wtxt">share the code to invite others<span class="wdots"></span></div>
+            <div class="wcode" id="w-code"></div>
+            <div class="cpyhint" id="copy-btn">[ click to copy ]</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="sbar">
+    <div class="spill"><span class="dot dot-idle" id="s-dot"></span><span id="s-txt">idle</span></div>
+    <div id="stats" style="opacity:.42;font-size:.62rem"></div>
+  </div>
+</div>
+
+<!-- THEMES MODAL -->
+<div class="mbd" id="themes-bd">
+  <div class="modal" style="max-width:400px">
+    <div class="mhdr"><strong>THEMES</strong><button class="mcls" data-close="themes-bd">✕</button></div>
+    <div class="mbody">
+      <div class="tgrid">
+        <div class="tsw sw-terminal" data-theme="terminal"><div class="swp">.:i1LG@<br>.,:tC08<br> .;1L@@</div><div class="swn">TERMINAL</div><span class="swtk" style="color:#39ff14"></span></div>
+        <div class="tsw sw-amber"    data-theme="amber">   <div class="swp">.:i1LG@<br>.,:tC08<br> .;1L@@</div><div class="swn">AMBER</div>   <span class="swtk" style="color:#ffb000"></span></div>
+        <div class="tsw sw-glacier"  data-theme="glacier"> <div class="swp">.:i1LG@<br>.,:tC08<br> .;1L@@</div><div class="swn">GLACIER</div> <span class="swtk" style="color:#00d4ff"></span></div>
+        <div class="tsw sw-crimson"  data-theme="crimson"> <div class="swp">.:i1LG@<br>.,:tC08<br> .;1L@@</div><div class="swn">CRIMSON</div> <span class="swtk" style="color:#ff3366"></span></div>
+        <div class="tsw sw-matrix"   data-theme="matrix">  <div class="swp">.:i1LG@<br>.,:tC08<br> .;1L@@</div><div class="swn">MATRIX</div>  <span class="swtk" style="color:#00ff41"></span></div>
+        <div class="tsw sw-vapor"    data-theme="vapor">   <div class="swp">.:i1LG@<br>.,:tC08<br> .;1L@@</div><div class="swn">VAPOR</div>   <span class="swtk" style="color:#e040fb"></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="mbd" id="prof-bd">
+  <div class="modal" style="max-width:340px">
+    <div class="mhdr"><strong>PROFILE</strong><button class="mcls" data-close="prof-bd">✕</button></div>
+    <div class="mbody">
+      <div class="prow"><span class="plbl">USERNAME</span><span class="pval" id="pm-user">—</span></div>
+      <div class="prow"><span class="plbl">EMAIL</span><span class="pval" id="pm-email" style="font-size:.72rem">—</span></div>
+      <div class="prow"><span class="plbl">THEME</span><span class="pval" id="pm-theme" style="text-transform:uppercase">—</span></div>
+      <div style="margin-top:1.2rem;display:flex;gap:.55rem;flex-wrap:wrap">
+        <button class="btn" id="pm-themes-btn" style="font-size:.7rem">⬡ CHANGE THEME</button>
+        <button class="btn danger" id="logout-btn" style="font-size:.7rem">⏻ LOGOUT</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden media -->
+<video id="local-video" muted playsinline style="display:none"></video>
+<canvas id="local-canvas" width="80" height="60" style="display:none"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+'use strict';
+
+// ─── Config (fetched from Edge Function — no credentials in this file) ────────
+const CFG_URL   = 'https://vcriojbgprbtpctersau.supabase.co/functions/v1/app-config';
+const RTC_CFG   = {iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]};
+const ASCII     = ' .,:;i1tfLCG08@'.split('');
+const FPS       = 15;
+const MAX_PEERS = 7;
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let sb, currentUser, profile;
+let localStream=null, channel=null, roomId=null, userId=null;
+let renderTimer=null, frames=0, fpsT=performance.now();
+const peers = new Map(); // uid → {pc, rv, canvas, ctx, ascii, panel}
+
+// ─── DOM ──────────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const loadEl   = $('loading');
+const authEl   = $('auth-screen');
+const joinEl   = $('join-screen');
+const callEl   = $('call-screen');
+const grid     = $('video-grid');
+const waitP    = $('waiting-panel');
+const lAscii   = $('local-ascii');
+const lVid     = $('local-video');
+const lCvs     = $('local-canvas');
+const lCtx     = lCvs.getContext('2d');
+lCtx.translate(80,0); lCtx.scale(-1,1); // selfie-mirror
+
+// ─── Boot ─────────────────────────────────────────────────────────────────────
+(async () => {
+  try {
+    // Handle email confirmation redirect (Supabase v2 sends ?token_hash=...&type=signup)
+    const params = new URLSearchParams(window.location.search);
+    const tokenHash = params.get('token_hash');
+    const type      = params.get('type');
+
+    // Fetch credentials from Edge Function
+    const r = await fetch(CFG_URL);
+    if (!r.ok) throw new Error('Config endpoint returned ' + r.status);
+    const {supabaseUrl, anonKey} = await r.json();
+    sb = window.supabase.createClient(supabaseUrl, anonKey);
+
+    applyTheme(localStorage.getItem('ascii-theme') || 'terminal');
+
+    // Complete email verification if params present
+    if (tokenHash && type) {
+      const {error} = await sb.auth.verifyOtp({token_hash: tokenHash, type});
+      if (!error) {
+        $('confirm-banner').style.display = 'block';
+        setTimeout(() => $('confirm-banner').style.display='none', 4000);
+        // Clean up URL
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+
+    const {data:{session}} = await sb.auth.getSession();
+    if (session) {
+      currentUser = session.user; userId = currentUser.id;
+      await loadProfile();
+      showJoin();
+    } else showAuth();
+  } catch(e) {
+    loadEl.innerHTML = `<div class="logo" style="font-size:3rem;color:var(--red)">ERROR</div><div class="info" style="color:var(--red);margin-top:1rem">${e.message}</div>`;
+  }
+})();
+
+// ─── Screen helpers ───────────────────────────────────────────────────────────
+function showAuth(){ loadEl.style.display='none'; authEl.style.display='flex'; joinEl.style.display='none'; callEl.style.display='none'; }
+function showJoin(){
+  loadEl.style.display='none'; authEl.style.display='none'; joinEl.style.display='flex'; callEl.style.display='none';
+  $('join-uname').textContent  = profile?.username || '—';
+  $('corner-name').textContent = profile?.username || '—';
+}
+function showCall(){ loadEl.style.display='none'; authEl.style.display='none'; joinEl.style.display='none'; callEl.style.display='flex'; }
+
+// ─── Themes ───────────────────────────────────────────────────────────────────
+const THEMES = ['terminal','amber','glacier','crimson','matrix','vapor'];
+function applyTheme(name){
+  if(!THEMES.includes(name)) name='terminal';
+  document.documentElement.dataset.theme = name==='terminal' ? '' : name;
+  document.querySelectorAll('.tsw').forEach(el=>{
+    const on = el.dataset.theme===name;
+    el.classList.toggle('active',on);
+    el.querySelector('.swtk').textContent = on?'✓':'';
+  });
+  localStorage.setItem('ascii-theme',name);
+  if($('pm-theme')) $('pm-theme').textContent=name;
+  if(profile && profile.theme!==name){
+    profile.theme=name;
+    sb?.from('profiles').update({theme:name}).eq('id',userId).then(()=>{});
+  }
+}
+document.querySelectorAll('.tsw').forEach(el=>el.addEventListener('click',()=>applyTheme(el.dataset.theme)));
+
+// ─── Auth tabs ────────────────────────────────────────────────────────────────
+document.querySelectorAll('.atab').forEach(tab=>tab.addEventListener('click',()=>{
+  document.querySelectorAll('.atab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.aform').forEach(f=>f.classList.remove('active'));
+  tab.classList.add('active');
+  $('form-'+tab.dataset.tab).classList.add('active');
+}));
+
+// ─── Login ────────────────────────────────────────────────────────────────────
+$('login-btn').addEventListener('click', async()=>{
+  const email=$('l-email').value.trim(), pass=$('l-pass').value, errEl=$('l-err');
+  errEl.textContent='';
+  $('login-btn').disabled=true; $('login-btn').textContent='LOGGING IN...';
+  const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
+  $('login-btn').disabled=false; $('login-btn').textContent='LOGIN →';
+  if(error){errEl.textContent=error.message;return;}
+  currentUser=data.user; userId=currentUser.id;
+  await loadProfile(); showJoin();
+});
+$('l-pass').addEventListener('keydown',e=>{ if(e.key==='Enter') $('login-btn').click(); });
+
+// ─── Sign Up ──────────────────────────────────────────────────────────────────
+$('signup-btn').addEventListener('click', async()=>{
+  const uname=$('s-user').value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
+  const email=$('s-email').value.trim(), pass=$('s-pass').value, errEl=$('s-err');
+  errEl.textContent='';
+  if(!uname||uname.length<3){errEl.textContent='Username: 3+ chars, a-z 0-9 _';return;}
+  if(!email){errEl.textContent='Email required';return;}
+  if(pass.length<6){errEl.textContent='Password must be 6+ characters';return;}
+
+  // Check username availability
+  const {data:ex}=await sb.from('profiles').select('id').eq('username',uname).maybeSingle();
+  if(ex){errEl.textContent='Username taken — try another';return;}
+
+  $('signup-btn').disabled=true; $('signup-btn').textContent='CREATING...';
+  const {data,error}=await sb.auth.signUp({
+    email, password:pass,
+    options:{ data:{ username:uname, theme: localStorage.getItem('ascii-theme')||'terminal' } }
+  });
+  $('signup-btn').disabled=false; $('signup-btn').textContent='CREATE ACCOUNT →';
+  if(error){errEl.textContent=error.message;return;}
+
+  // If email confirmation required, tell user; otherwise log in
+  if(data.session){
+    currentUser=data.user; userId=currentUser.id;
+    await loadProfile(); showJoin();
+  } else {
+    errEl.style.color='var(--p)';
+    errEl.textContent='✓ Check your email and click the confirmation link, then log in.';
+  }
+});
+
+// ─── Logout ───────────────────────────────────────────────────────────────────
+$('logout-btn').addEventListener('click', async()=>{
+  closeModal('prof-bd');
+  await sb.auth.signOut();
+  currentUser=null; profile=null; userId=null;
+  // Clean up any active call
+  if(channel){ endCall(); return; }
+  showAuth();
+});
+
+// ─── Profile ──────────────────────────────────────────────────────────────────
+async function loadProfile(){
+  const {data}=await sb.from('profiles').select('*').eq('id',userId).maybeSingle();
+  profile=data;
+  if(data?.theme) applyTheme(data.theme);
+}
+
+function openProfileModal(){
+  // Show modal even if profile is partial/null
+  $('pm-user').textContent  = profile?.username || currentUser?.email?.split('@')[0] || '—';
+  $('pm-email').textContent = currentUser?.email || '—';
+  $('pm-theme').textContent = profile?.theme || localStorage.getItem('ascii-theme') || 'terminal';
+  openModal('prof-bd');
+}
+
+// ─── ASCII conversion ─────────────────────────────────────────────────────────
+function toAscii(canvas,ctx){
+  const w=canvas.width,h=canvas.height;
+  const d=ctx.getImageData(0,0,w,h).data;
+  const CF=(259*(128+255))/(255*(259-128));
+  let out='';
+  for(let y=0;y<h;y+=2){
+    for(let x=0;x<w;x++){
+      const o=(y*w+x)*4;
+      const r=Math.max(0,Math.min(255,((d[o]  -128)*CF|0)+128));
+      const g=Math.max(0,Math.min(255,((d[o+1]-128)*CF|0)+128));
+      const b=Math.max(0,Math.min(255,((d[o+2]-128)*CF|0)+128));
+      const br=(0.299*r+0.587*g+0.114*b)/255;
+      out+=ASCII[ASCII.length-1-Math.round(br*(ASCII.length-1))];
+    }
+    out+='\n';
+  }
+  return out;
+}
+
+// ─── Dynamic grid layout ─────────────────────────────────────────────────────
+function updateGrid(){
+  const total = 1 + peers.size + (peers.size===0?1:0); // local + remotes + waiting if no remotes
+  const actual= 1 + peers.size; // actual panels with feeds
+
+  waitP.style.display = peers.size>0 ? 'none' : '';
+
+  let cols, rows;
+  if(actual<=1)      { cols=1; rows=1; }
+  else if(actual===2){ cols=2; rows=1; }
+  else if(actual<=4) { cols=2; rows=2; }
+  else if(actual<=6) { cols=3; rows=2; }
+  else               { cols=4; rows=2; }
+
+  // If showing waiting panel too, treat as 2 panels
+  const displayCount = peers.size===0 ? 2 : actual;
+  if(displayCount===1)      { cols=1; rows=1; }
+  else if(displayCount===2) { cols=2; rows=1; }
+  else if(displayCount<=4)  { cols=2; rows=2; }
+  else if(displayCount<=6)  { cols=3; rows=2; }
+  else                      { cols=4; rows=2; }
+
+  grid.style.gridTemplateColumns = `repeat(${cols},1fr)`;
+  grid.style.gridTemplateRows    = `repeat(${rows},1fr)`;
+
+  // Scale ASCII font size to fit the panel
+  const panelW = (grid.clientWidth  - (cols-1)*10) / cols;
+  const panelH = (grid.clientHeight - (rows-1)*10) / rows - 30; // minus header
+  // 80 chars wide, ~30 rows tall; pick font that fits
+  const byW = Math.floor(panelW / (80 * 0.62));  // ~0.62 width ratio of monospace at 1px
+  const byH = Math.floor(panelH / 30);
+  const fs  = Math.max(4, Math.min(byW, byH, 12));
+  document.querySelectorAll('pre.asc').forEach(el=>{
+    el.style.fontSize   = fs+'px';
+    el.style.lineHeight = (fs+.3)+'px';
+  });
+}
+
+// ─── Render loop ──────────────────────────────────────────────────────────────
+function startRender(){
+  if(renderTimer) clearInterval(renderTimer);
+  renderTimer=setInterval(()=>{
+    if(lVid.readyState>=2){ lCtx.drawImage(lVid,0,0,80,60); lAscii.textContent=toAscii(lCvs,lCtx); }
+    for(const [,p] of peers) if(p.rv?.readyState>=2){ p.ctx.drawImage(p.rv,0,0,80,60); p.ascii.textContent=toAscii(p.canvas,p.ctx); }
+    frames++;
+    const now=performance.now();
+    if(now-fpsT>1000){ $('stats').textContent=`${frames}fps · ${peers.size} remote`; frames=0; fpsT=now; }
+  },1000/FPS);
+}
+function stopRender(){ if(renderTimer){clearInterval(renderTimer);renderTimer=null;} }
+
+// ─── Status ───────────────────────────────────────────────────────────────────
+function setSt(type,msg){ $('s-dot').className='dot dot-'+type; $('s-txt').textContent=msg; }
+function updateCount(){ $('peer-count').textContent=(1+peers.size)+' online'; updateGrid(); }
+
+// ─── Signaling ────────────────────────────────────────────────────────────────
+function sig(payload){ channel.send({type:'broadcast',event:'sig',payload:{...payload,from:userId}}); }
+
+// ─── Peer management ─────────────────────────────────────────────────────────
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function makePanel(pid,uname){
+  const d=document.createElement('div');
+  d.className='video-panel'; d.dataset.peer=pid;
+  d.innerHTML=`
+    <div class="vph">
+      <span class="pname">${esc(uname||pid.slice(0,8).toUpperCase())}</span>
+      <span class="ind" id="ind-${pid}"></span>
+    </div>
+    <div class="ascii-wrap">
+      <div class="wstate" id="wt-${pid}">
+        <div class="wtxt">connecting<span class="wdots"></span></div>
+      </div>
+      <pre class="asc" id="a-${pid}" style="display:none"></pre>
+    </div>`;
+  return d;
+}
+
+async function initPeer(pid,uname){
+  if(peers.has(pid)) return peers.get(pid).pc;
+  if(peers.size>=MAX_PEERS){ console.warn('Room full'); return null; }
+
+  const pc=new RTCPeerConnection(RTC_CFG);
+  const canvas=document.createElement('canvas'); canvas.width=80; canvas.height=60;
+  const ctx=canvas.getContext('2d');
+  const rv=document.createElement('video'); rv.playsInline=true;
+
+  const panel=makePanel(pid,uname);
+  grid.insertBefore(panel,waitP);
+
+  const aEl=$('a-'+pid), wtEl=$('wt-'+pid), indEl=$('ind-'+pid);
+  peers.set(pid,{pc,canvas,ctx,rv,ascii:aEl,panel});
+
+  localStream.getTracks().forEach(t=>pc.addTrack(t,localStream));
+
+  pc.ontrack=({streams})=>{
+    rv.srcObject=streams[0]; rv.play().catch(()=>{});
+    if(wtEl) wtEl.style.display='none';
+    if(aEl)  aEl.style.display='block';
+    if(indEl) indEl.classList.add('live');
+    setSt('connected','connected');
+    updateCount();
+  };
+  pc.onicecandidate=({candidate})=>{ if(candidate) sig({type:'ice',to:pid,candidate}); };
+  pc.onconnectionstatechange=()=>{
+    if(['disconnected','failed','closed'].includes(pc.connectionState)) removePeer(pid);
+  };
+
+  updateCount();
+  return pc;
+}
+
+async function callPeer(pid,uname){
+  const pc=await initPeer(pid,uname); if(!pc) return;
+  const offer=await pc.createOffer();
+  await pc.setLocalDescription(offer);
+  sig({type:'offer',to:pid,sdp:offer.sdp,username:profile?.username});
+}
+
+async function answerOffer(pid,uname,sdp){
+  const polite=userId<pid;
+  let p=peers.get(pid);
+  if(!p){ await initPeer(pid,uname); p=peers.get(pid); }
+  const {pc}=p;
+  const collision=pc.signalingState!=='stable';
+  if(collision){ if(!polite) return; await pc.setLocalDescription({type:'rollback'}); }
+  await pc.setRemoteDescription({type:'offer',sdp});
+  const ans=await pc.createAnswer();
+  await pc.setLocalDescription(ans);
+  sig({type:'answer',to:pid,sdp:ans.sdp});
+}
+
+function removePeer(pid){
+  const p=peers.get(pid); if(!p) return;
+  p.pc.close();
+  if(p.rv) p.rv.srcObject=null;
+  if(p.panel?.parentNode) p.panel.parentNode.removeChild(p.panel);
+  peers.delete(pid);
+  setSt(peers.size>0?'connected':'waiting',peers.size>0?'connected':'waiting for peers...');
+  updateCount();
+}
+
+// ─── Join room ────────────────────────────────────────────────────────────────
+async function joinRoom(id){
+  roomId=id.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
+  $('room-display').textContent=roomId;
+  $('w-code').textContent=roomId;
+  $('local-name').textContent=(profile?.username||'you').toUpperCase();
+  showCall(); setSt('waiting','starting camera...');
+
+  try{
+    localStream=await navigator.mediaDevices.getUserMedia({video:{width:320,height:240,facingMode:'user'},audio:true});
+    lVid.srcObject=localStream; await lVid.play();
+  } catch(e){ setSt('error','camera: '+e.message); return; }
+
+  startRender();
+  updateGrid(); // Initial layout
+  setSt('waiting','joining room...');
+
+  // Upsert room with fresh last_active
+  sb.from('rooms').upsert({id:roomId,created_by:userId,last_active:new Date().toISOString()}).then(()=>{});
+
+  channel=sb.channel('ascii-call:'+roomId,{config:{broadcast:{self:false}}});
+
+  channel.on('broadcast',{event:'sig'},async({payload})=>{
+    if(payload.from===userId) return;
+    if(payload.to && payload.to!==userId) return;
+
+    switch(payload.type){
+      case 'join':
+        // Someone new: tell them I'm here
+        sig({type:'here',to:payload.from,username:profile?.username});
+        break;
+      case 'here':
+        // Existing peer replied: I call them
+        if(!peers.has(payload.from)) await callPeer(payload.from,payload.username);
+        break;
+      case 'offer':
+        await answerOffer(payload.from,payload.username,payload.sdp);
+        break;
+      case 'answer':
+        { const p=peers.get(payload.from); if(p) await p.pc.setRemoteDescription({type:'answer',sdp:payload.sdp}); break; }
+      case 'ice':
+        { const p=peers.get(payload.from); if(p) try{await p.pc.addIceCandidate(new RTCIceCandidate(payload.candidate));}catch(_){} break; }
+      case 'leave':
+        removePeer(payload.from);
+        break;
+    }
+  });
+
+  await channel.subscribe(status=>{
+    if(status==='SUBSCRIBED'){
+      setSt('waiting','in room · waiting for peers...');
+      updateCount();
+      sig({type:'join',username:profile?.username});
+    }
+  });
+
+  // Keep room's last_active fresh every 2 minutes
+  setInterval(()=>{
+    if(channel) sb.from('rooms').update({last_active:new Date().toISOString()}).eq('id',roomId).then(()=>{});
+  }, 120_000);
+
+  window.addEventListener('resize',updateGrid);
+}
+
+// ─── End call ─────────────────────────────────────────────────────────────────
+function endCall(){
+  if(channel) sig({type:'leave'});
+  stopRender();
+  for(const [pid] of [...peers]) removePeer(pid);
+  if(channel){sb.removeChannel(channel);channel=null;}
+  if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null;}
+  lVid.srcObject=null; lAscii.textContent='';
+  document.querySelectorAll('[data-peer]').forEach(el=>el.remove());
+  waitP.style.display='';
+  window.removeEventListener('resize',updateGrid);
+
+  if(currentUser) showJoin();
+  else showAuth();
+}
+
+window.addEventListener('beforeunload',()=>{ if(channel) sig({type:'leave'}); });
+
+// ─── Modals ───────────────────────────────────────────────────────────────────
+function openModal(id){ $(id).classList.add('open'); }
+function closeModal(id){ $(id).classList.remove('open'); }
+document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));
+document.querySelectorAll('.mbd').forEach(bd=>bd.addEventListener('click',e=>{ if(e.target===bd) closeModal(bd.id); }));
+
+// ─── UI wiring ────────────────────────────────────────────────────────────────
+$('join-btn').addEventListener('click',()=>{
+  const v=$('room-input').value.trim();
+  if(v.length>=4) joinRoom(v);
+  else{ $('room-input').style.borderColor='var(--red)'; setTimeout(()=>$('room-input').style.borderColor='',1200); }
+});
+$('new-room-btn').addEventListener('click',()=>joinRoom(Math.random().toString(36).slice(2,8)));
+$('room-input').addEventListener('keydown',e=>{ if(e.key==='Enter') $('join-btn').click(); });
+$('room-input').addEventListener('input',e=>{ e.target.value=e.target.value.toUpperCase(); });
+$('end-btn').addEventListener('click',endCall);
+$('copy-btn').addEventListener('click',()=>{
+  navigator.clipboard.writeText(roomId||'').then(()=>{
+    $('copy-btn').textContent='[ copied! ]';
+    setTimeout(()=>$('copy-btn').textContent='[ click to copy ]',1800);
+  });
+});
+[$('join-themes-btn'),$('call-themes-btn'),$('pm-themes-btn')].forEach(b=>{ if(b) b.addEventListener('click',()=>{ closeModal('prof-bd'); openModal('themes-bd'); }); });
+[$('prof-corner'),$('call-prof-btn')].forEach(b=>{ if(b) b.addEventListener('click',openProfileModal); });
+</script>
+</body>
+</html>
