@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASCII.CALL — Your Sign-In Link</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f0ede8;font-family:'Courier New',Courier,monospace;color:#1a1a1a;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f0ede8;min-height:100vh;">
+  <tr><td align="center" valign="top" style="padding:40px 16px 48px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:420px;width:100%;">
+
+      <!-- LOGO -->
+      <tr><td align="center" style="padding-bottom:28px;">
+        <div style="font-family:'Courier New',Courier,monospace;font-size:42px;font-weight:bold;line-height:1;color:#1a1a1a;letter-spacing:0.04em;">ASCII.CALL</div>
+        <div style="font-size:11px;color:#888;letter-spacing:0.3em;margin-top:6px;text-transform:uppercase;">real-time video &middot; rendered in characters</div>
+      </td></tr>
+
+      <!-- PANEL -->
+      <tr><td style="background-color:#e8e4de;border:1px solid #ccc8c2;">
+        <div style="font-size:10px;color:#888;letter-spacing:0.25em;padding:10px 18px;border-bottom:1px solid #ccc8c2;text-transform:uppercase;">ONE-TIME SIGN-IN LINK</div>
+        <div style="padding:24px 28px 28px;">
+          <p style="font-size:12px;color:#888;letter-spacing:0.22em;margin:0 0 20px;text-transform:uppercase;">TERMINAL ACCESS REQUESTED</p>
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;"><tr><td style="height:1px;background-color:#ccc8c2;font-size:0;line-height:0;">&nbsp;</td></tr></table>
+          <p style="font-size:12px;color:#1a1a1a;letter-spacing:0.05em;line-height:1.8;margin:0 0 8px;">A passwordless sign-in was requested for your ASCII.CALL account.</p>
+          <p style="font-size:12px;color:#888;letter-spacing:0.05em;line-height:1.8;margin:0 0 28px;">This link grants immediate access and can only be used once. It expires in <span style="color:#1a1a1a;">1 hour</span>. Do not share it.</p>
+          <!-- CTA -->
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
+            <tr><td align="center">
+              <a href="{{ .ConfirmationURL }}" style="display:block;font-family:'Courier New',Courier,monospace;font-size:12px;font-weight:bold;color:#1a1a1a;letter-spacing:0.15em;text-align:center;padding:12px 20px;border:1px solid #1a1a1a;background-color:#e8e4de;text-decoration:none;text-transform:uppercase;">SIGN IN NOW &rarr;</a>
+            </td></tr>
+          </table>
+          <!-- One-time note -->
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;"><tr><td style="background-color:#f0ede8;border:1px solid #ccc8c2;padding:10px 14px;">
+            <p style="font-size:10px;color:#888;letter-spacing:0.08em;line-height:1.6;margin:0;text-align:center;text-transform:uppercase;">⚠ single use &nbsp;·&nbsp; expires in 1 hour &nbsp;·&nbsp; do not forward</p>
+          </td></tr></table>
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;"><tr><td style="height:1px;background-color:#ccc8c2;font-size:0;line-height:0;">&nbsp;</td></tr></table>
+          <p style="font-size:10px;color:#888;letter-spacing:0.2em;margin:0 0 8px;text-transform:uppercase;">LINK FALLBACK</p>
+          <p style="font-size:10px;color:#888;letter-spacing:0.03em;line-height:1.7;margin:0 0 8px;">If the button above does not work, copy and paste this URL into your browser:</p>
+          <p style="font-size:10px;color:#1a1a1a;letter-spacing:0.03em;word-break:break-all;margin:0;border-left:2px solid #ccc8c2;padding-left:10px;">{{ .ConfirmationURL }}</p>
+        </div>
+      </td></tr>
+
+      <!-- SECURITY NOTE -->
+      <tr><td style="padding-top:14px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background-color:#e8e4de;border:1px solid #ccc8c2;padding:14px 18px;">
+          <p style="font-size:10px;color:#888;letter-spacing:0.05em;line-height:1.7;margin:0;">If you did not request this link, you can safely ignore it. Your account remains secure and no action is required.</p>
+        </td></tr></table>
+      </td></tr>
+
+      <!-- FOOTER -->
+      <tr><td align="center" style="padding-top:28px;">
+        <p style="font-size:10px;color:#aaa;letter-spacing:0.15em;margin:0 0 6px;">peer-to-peer &middot; up to 8 participants &middot; all ASCII</p>
+        <p style="font-size:10px;color:#bbb;letter-spacing:0.1em;margin:0;">&copy; ASCII.CALL</p>
+      </td></tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>
